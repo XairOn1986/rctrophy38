@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Results
+{% endblock %}
+
+{% block main %}
+    <h1 align="left">Result of last stage:</h1>
+    <table class="table tablestriped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Model</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row["name"] }}</td>
+                <td>{{ row["result"] }}</td>
+                <td>{{ row["model"] }}</td>
+                <td>{{ row["score"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td  class="fw-bold">Link for video</td>
+                <td><a href="{{ link_to_video }}">Click Me</a></td>
+            </tr>
+        </tfoot>
+    </table>
+{% endblock %}
