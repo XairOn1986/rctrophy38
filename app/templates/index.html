@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Results
+    Результаты
 {% endblock %}
 
 {% block main %}
-    <h1 align="left">Result of last stage:</h1>
+    <h1 align="left">Результаты последнего этапа:</h1>
     <table class="table tablestriped">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Result</th>
-                <th>Model</th>
-                <th>Score</th>
+                <th>Имя</th>
+                <th>Результат</th>
+                <th>Модель</th>
+                <th>Очки</th>
             </tr>
         </thead>
         <tbody>
@@ -29,9 +29,8 @@
             <tr>
                 <td></td>
                 <td></td>
-                <td></td>
-                <td  class="fw-bold">Link for video</td>
-                <td><a href="{{ link_to_video }}">Click Me</a></td>
+                <td  class="fw-bold">Ссылка на видео</td>
+                <td><a href="{{ link_to_video }}">Жми сюда</a></td>
             </tr>
         </tfoot>
     </table>

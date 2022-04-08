@@ -1,23 +1,23 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register
+    Регистрация
 {% endblock %}
 
 {% block main %}
     <form action="/register" method="post">
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Имя" type="text">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+            <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Пароль" type="password">
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="confirmation" name="confirmation" placeholder="Repeat Password" type="password">
+            <input class="form-control mx-auto w-auto" id="confirmation" name="confirmation" placeholder="Пароль снова" type="password">
         </div>
         <div class="mb-3">
             <input class="form-control mx-auto w-auto" id="email" name="email" placeholder="Email" type="text">
         </div>
-        <button class="btn btn-primary" type="submit">Register</button>
+        <button class="btn btn-primary" type="submit">Регистрация</button>
     </form>
 {% endblock %}
