@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Модели
+{% endblock %}
+
+{% block main %}
+    <h1 align="left">Модели:</h1>
+    
+    <div align="left">
+        <form action="/all_models" method="post">            
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Владелец</th>
+                <th>Имя</th>
+                <th>производитель</th>
+                <th>Модель</th>
+                <th>Мосты</th>
+                <th>Клиренс</th>
+                <th>Расположение сервы</th>
+                <th>Вес</th>
+                <th>Баланс(перед/зад)</th>
+                <th>Комбо</th>
+                <th>Тип лебедки</th>
+                <th>Длина колесной базы</th>
+                <th>Тип кузова</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for model in models %}
+            <tr>
+                <td>{{ model["owner_username"] }}</td>
+                <td>{{ model["name"] }}</td>
+                <td>{{ model["vendor"] }}</td>
+                <td>{{ model["model"] }}</td>
+                <td>{{ model["axles"] }}</td>
+                <td>{{ model["clearance"] }}</td>
+                <td>{{ model["servo_on"] }}</td>
+                <td>{{ model["weight"] }}</td>                
+                <td>{{ model["balance"] }}</td>
+                <td>{{ model["combo"] }}</td>
+                <td>{{ model["winch"] }}</td>
+                <td>{{ model["base"] }}</td>
+                <td>{{ model["body"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

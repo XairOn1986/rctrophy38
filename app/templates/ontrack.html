@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Заезд
+{% endblock %}    
+{% block main %} 
+    <div align="left">
+        <button class="btn btn-primary" type="submit" id="btn_add_winch_before_limit" 
+        onclick="add_winch_before_limit()">Лебёдки до лимита - 
+        <span id="winch_before_limit">0</span></button>
+    </div>
+        <h1 id="timer">Время заезда - 
+            <span id="minute"></span>
+            :
+            <span id="secund"></span>
+        </h1>
+        <button class="btn btn-primary" onclick="start_timer()" id="start_timer" type="submit">Start</button>
+        <button class="btn btn-primary" onclick="pause_timer()" id="pause_timer" type="submit">Pause</button>
+        <button class="btn btn-primary" onclick="reset_timer()" id="reset_timer" type="submit">Reset</button>
+       
+        <table id="mainTab" class="table tablestriped">
+            <thead>
+                <tr>
+                    <td>-</td>
+                    <td>штраф</td>
+                    <td>цена</td>
+                    <td>итог</td>
+                    <td>+</td>
+                </tr>
+            </thead>
+            <tbody>            
+                {% for penalty in penaltys %}
+                    <tr>                        
+                        <td><button class="btn btn-primary" onclick="degrease_penalty_score(this.id)" id="{{ penalty["name"] }}">-</button></td>
+                        <td>{{ penalty["name"] }}</td>
+                        <td>{{ penalty["price"] }}</td>
+                        <td id="{{ penalty["name"] }}span_score">0</td>                        
+                        <td><button class="btn btn-primary" onclick="increase_penalty_score(this.id)" id="{{ penalty["name"] }}">+</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="get_result()" id="get_result" type="submit">Результаты</button>
+        <span id="get_result_span_sum">0</span>  
+{% endblock %}
+{% block script %}
+    <script>
+        // Timer!!
+        //Initialize variables
+        let secund = 0;
+        let minute = 0;
+        let timer_id;
+        let winch_before_limit = 0;
+             
+
+        document.getElementById("minute").innerHTML = minute;
+        document.getElementById("secund").innerHTML = secund;
+        document.getElementById("pause_timer").disabled = true;
+        document.getElementById("reset_timer").disabled = true;
+        
+        
+        
+        function start_timer(flag) {
+            document.getElementById("start_timer").disabled = true;
+            document.getElementById("pause_timer").disabled = false;
+            document.getElementById("reset_timer").disabled = true;            
+            timer_id = setInterval(timer_go, 1000)
+            }
+        
+        function pause_timer() {
+            document.getElementById("start_timer").disabled = false;
+            document.getElementById("pause_timer").disabled = true;
+            document.getElementById("reset_timer").disabled = false;       
+            clearInterval(timer_id)
+            }
+
+        function reset_timer() {
+            document.getElementById("start_timer").disabled = false;
+            document.getElementById("pause_timer").disabled = true;
+            document.getElementById("reset_timer").disabled = true;       
+            secund = 0;
+            minute = 0;
+            document.getElementById("minute").innerHTML = minute;
+            document.getElementById("secund").innerHTML = secund;
+            }
+
+
+        function timer_go() {
+            secund = secund + 1;
+            if (secund == 60) {
+                secund =0;
+                minute = minute + 1;
+                document.getElementById("minute").innerHTML = minute;
+            }
+            document.getElementById("secund").innerHTML = secund;            
+            }
+        ///Change value of penalty
+        function increase_penalty_score(span_part_id) {
+                span_full_id = span_part_id + "span_score";
+                let span_score = Number(document.getElementById(span_full_id).innerText);
+                document.getElementById(span_full_id).innerHTML = span_score + 1;
+        }
+        function degrease_penalty_score(span_part_id) {
+                span_full_id = span_part_id + "span_score";
+                let span_score = Number(document.getElementById(span_full_id).innerText);
+                if ((span_score - 1) < 0) span_score = 0
+                else span_score = span_score - 1;
+                document.getElementById(span_full_id).innerHTML = span_score;
+        }
+
+        ///Count Result 
+        ///Get penaltys
+        function get_result() {
+            let sum = 0;
+            let trs = document.querySelectorAll("#mainTab tr");
+            let total = new Array(trs[0].children.length).fill(0);
+            // Создает массив размером с количество <th>, заполняет всё нулями
+            for (let i = 1; i < trs.length; i++) {
+                let tds = trs[i].children;
+                sum = sum + (Number(tds[2].textContent) * Number(tds[3].textContent));
+            }
+            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}:${secund}`;
+        }
+        function add_winch_before_limit() {             
+            winch_before_limit = winch_before_limit + 1
+            if (winch_before_limit == 2) document.getElementById("btn_add_winch_before_limit").disabled = true;            
+            document.getElementById("winch_before_limit").innerHTML = winch_before_limit;
+        }            
+
+    </script>
+{% endblock %}
+

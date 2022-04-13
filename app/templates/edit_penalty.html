@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Штрафы
+{% endblock %}
+
+{% block main %}
+    <h1 align="left">Штрафы:</h1>
+    
+    <div align="left">
+        <form action="/edit_penalty" method="post">
+            <div class="mb-3">
+                <button class="btn btn-primary" name="add_penalty" value="add_penalty" type="submit">
+                    Добавить штраф</button>
+                <input autocomplete="off" autofocus class="mx-auto w-auto" id="penalty_name"
+                    name="penalty_name" placeholder="Название" type="text">
+                <input autocomplete="off" autofocus class="mx-auto w-auto" id="penalty_price"
+                    name="penalty_price" placeholder="Минут" type="text">
+            </div>     
+
+            <button class="btn btn-primary" name="remove_penalty" value="remove_penalty" type="submit">
+                Удалить штраф  </button>
+            <select name="remove_penalty_name" >
+                <option value="" selected disabled hidden>Уверен?</option>                    
+                {% for penalty in penaltys %}
+                    <option value="{{ penalty["name"] }}">{{ penalty["name"] }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <table class="table tablestriped">
+        <thead>
+            <tr>
+                <th>Штраф</th>
+                <th>Минуты</th>                
+            </tr>
+        </thead>
+        <tbody>
+            {% for penalty in penaltys %}
+            <tr>
+                <td>{{ penalty["name"] }}</td>
+                <td>{{ penalty["price"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

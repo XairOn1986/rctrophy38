@@ -4,6 +4,7 @@ import requests
 import urllib.parse
 from flask import render_template, request, session, redirect
 from functools import wraps
+from hashlib import md5
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -31,3 +32,8 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+def avatar(email, size):
+        digest = md5(email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
+

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Кабинет
+{% endblock %}
+
+{% block main %}
+<table>
+    <tr valign="top">
+        <td><img src="{{ photo }}"></td>
+        <td><h1>User: {{ user }}</h1><br> <a href="/garage">Гараж</a></td>
+    </tr>
+    <tr>
+        <td><a href="https://ru.gravatar.com/">Измени иконку тут</a></td>
+    </tr>
+</table>
+{% endblock %}

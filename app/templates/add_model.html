@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Добавить
+{% endblock %}
+
+{% block main %}
+    <h1 align="left">Добавить Модель:</h1>
+    <p align="left" color="red">Что красным обязательно!</p>
+    <form action="/add_model" method="post">
+        <table class="table tablestriped">
+            <tr>
+                <td>
+                    <div class="mb-3">
+                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    </div>
+                    <div class="mb-3">
+                        <input style='background-color:red' autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Имя модели" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="vendor" name="vendor" placeholder="Производитель" type="text">
+                    </div>
+                    <div class="mb-3">            
+                        <input style='background-color:red' autocomplete="off" autofocus class="form-control mx-auto w-auto" id="model" name="model" placeholder="Модель" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <div class="mb-3">
+                            <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="axles" name="axles">
+                                <option disabled="" selected="">Мосты</option>                
+                                <option value="forward">Прямые</option>
+                                <option value="portals">Порталы</option>                
+                        </div>
+                    </div>                 
+                    <div class="mb-3">
+                        <input style='margin-top: 15px;' autocomplete="off" autofocus class="form-control mx-auto w-auto" min="1" id="clearance" name="clearance" placeholder="Клиренс мм" type="number">
+                    </div>
+                    <div class="mb-3">
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="servo_on" name="servo_on">
+                            <option disabled="" selected="">Расположение сервы</option>                
+                            <option value="axle">На мосту</option>
+                            <option value="chassis">На раме</option>                
+                    </div>
+                    <div class="mb-3">
+                        <input style='margin-top: 15px;' autocomplete="off" autofocus class="form-control mx-auto w-auto" min="1" id="weight" name="weight" placeholder="Вес в граммах" type="number">
+                    </div>
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="balance" name="balance" placeholder="Развесовка XX%/XX%" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="combo" name="combo" placeholder="Комбо ESC+Motor" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="winch" name="winch">
+                            <option disabled="" selected="">Вид лебедки</option>                
+                            <option value="winch">Лебедка</option>
+                            <option value="servo">Серволебедь</option>                
+                    </div>
+                    <div class="mb-3">
+                        <input style='margin-top: 15px;' autocomplete="off" autofocus class="form-control mx-auto w-auto" id="tires" name="tires" placeholder="Шины и размер" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" min="1" id="base" name="base" placeholder="Длина колесной базы" type="number">
+                    </div>
+                    <div class="mb-3">
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="body" name="body">
+                            <option disabled="" selected="">Тип кузова</option>                
+                            <option value="hard">Пластик</option>
+                            <option value="lexan">Лексан</option>                
+                    </div>
+                </td>   
+            </tr>   
+        </table> 
+    </form>
+{% endblock %}
