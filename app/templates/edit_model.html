@@ -26,12 +26,26 @@
                         <input style='background-color:red' autocomplete="off" autofocus class="form-control mx-auto w-auto" id="model" name="model"\
                         value="{{ model[0]["model"] }}" placeholder="Модель" type="text">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3">                        
                         <div class="mb-3">
+                            {% if model[0]["axles"] == none %}
                             <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="axles" name="axles">
                                 <option disabled="" selected="">Мосты</option>                
                                 <option value="forward">Прямые</option>
-                                <option value="portals">Порталы</option>                
+                                <option value="portals">Порталы</option>
+                            {% endif %}
+                            {% if model[0]["axles"] == "forward" %}
+                            <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="axles" name="axles">
+                                <option disabled="">Мосты</option>                
+                                <option selected value="forward">Прямые</option>
+                                <option value="portals">Порталы</option>
+                            {% endif %}
+                            {% if model[0]["axles"] == "portals" %}
+                            <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="axles" name="axles">
+                                <option disabled="">Мосты</option>                
+                                <option value="forward">Прямые</option>
+                                <option selected value="portals">Порталы</option>
+                            {% endif %}
                         </div>
                     </div>                 
                     <div class="mb-3">
@@ -39,10 +53,24 @@
                         value={{ model[0]["clearance"] }} placeholder="Клиренс мм" type="number">
                     </div>
                     <div class="mb-3">
+                        {% if model[0]["servo_on"] == none %}
                         <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="servo_on" name="servo_on">
                             <option disabled="" selected="">Расположение сервы</option>                
                             <option value="axle">На мосту</option>
-                            <option value="chassis">На раме</option>                
+                            <option value="chassis">На раме</option>
+                        {% endif %}   
+                        {% if model[0]["servo_on"] == "axle" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="servo_on" name="servo_on">
+                            <option disabled="" >Расположение сервы</option>                
+                            <option selected value="axle">На мосту</option>
+                            <option value="chassis">На раме</option>
+                        {% endif %}     
+                        {% if model[0]["servo_on"] == "chassis" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="servo_on" name="servo_on">
+                            <option disabled="" >Расположение сервы</option>                
+                            <option value="axle">На мосту</option>
+                            <option selected value="chassis">На раме</option>
+                        {% endif %}          
                     </div>
                     <div class="mb-3">
                         <input style='margin-top: 15px;' autocomplete="off" autofocus class="form-control mx-auto w-auto" min="1" id="weight" name="weight"\
@@ -57,10 +85,24 @@
                         value="{{ model[0]["combo"] }}" placeholder="Комбо ESC+Motor" type="text">
                     </div>
                     <div class="mb-3">
+                        {% if model[0]["winch"] == none %}
                         <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="winch" name="winch">
                             <option disabled="" selected="">Вид лебедки</option>                
                             <option value="winch">Лебедка</option>
-                            <option value="servo">Серволебедь</option>                
+                            <option value="servo">Серволебедь</option> 
+                        {% endif %}
+                        {% if model[0]["winch"] == "servo" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="winch" name="winch">
+                            <option disabled="" >Вид лебедки</option>                
+                            <option value="winch">Лебедка</option>
+                            <option selected value="servo">Серволебедь</option> 
+                        {% endif %}
+                        {% if model[0]["winch"] == "winch" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="winch" name="winch">
+                            <option disabled="" >Вид лебедки</option>                
+                            <option selected  value="winch">Лебедка</option>
+                            <option value="servo">Серволебедь</option> 
+                        {% endif %}                              
                     </div>
                     <div class="mb-3">
                         <input style='margin-top: 15px;' autocomplete="off" autofocus class="form-control mx-auto w-auto" id="tires" name="tires"\
@@ -71,10 +113,24 @@
                         value={{ model[0]["base"] }} placeholder="Длина колесной базы" type="number">
                     </div>
                     <div class="mb-3">
+                        {% if model[0]["body"] == none %}
                         <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="body" name="body">
                             <option disabled="" selected="">Тип кузова</option>                
                             <option value="hard">Пластик</option>
-                            <option value="lexan">Лексан</option>                
+                            <option value="lexan">Лексан</option> 
+                        {% endif %} 
+                        {% if model[0]["body"] == "hard" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="body" name="body">
+                            <option disabled="">Тип кузова</option>                
+                            <option selected value="hard">Пластик</option>
+                            <option value="lexan">Лексан</option> 
+                        {% endif %} 
+                        {% if model[0]["body"] == "lexan" %}
+                        <select autocomplete="off" autofocus class="form-select mx-auto w-auto" id="body" name="body">
+                            <option disabled="">Тип кузова</option>                
+                            <option value="hard">Пластик</option>
+                            <option selected value="lexan">Лексан</option> 
+                        {% endif %}             
                     </div>
                     <input style="display: none" id="id" name="id" value="{{ model[0]["id"] }}" type="number">                   
                 </td>   
