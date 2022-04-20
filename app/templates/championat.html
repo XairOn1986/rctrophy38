@@ -3,18 +3,29 @@
 {% block title %}
     Чемпионат
 {% endblock %}    
-{% block main %}    
-    {% if session_id == 7 %} 
-        <form action="/championat" method="post">
-            <div align="left" class="mb-3">
-                <button class="btn btn-primary" name="edit_penalty" value="edit_penalty"\
-                type="submit">Редактировать Штрафы</button>
-            </div>   
-        </form>
-    {% else %}
-    <!-- Zaglushka!!!-->
-        <h1 align="center">Разрабатывается!</h1>
-    {% endif %}
+{% block main %}        
+        <h1 align="center">Чемпионат {{ championat_year }} года!</h1>
+        <h3 align="left"><a href="/">Результаты по этапам</a> </h3>
+        <table class="table tablestriped">
+            <thead>
+                <tr>
+                    <th>Фото</th>
+                    <th>Участник</th>                    
+                    <th>место</th>
+                    <th>Баллы</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td><img src="{{ row["avatar"] }}"></td>
+                    <td>{{ row["username"] }}</td>                    
+                    <td>{{ row["place"] }}</td>
+                    <td>{{ row["score"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 {% endblock %}
 {% block script %}    
 {% endblock %}

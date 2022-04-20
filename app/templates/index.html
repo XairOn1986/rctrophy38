@@ -5,33 +5,51 @@
 {% endblock %}
 
 {% block main %}
-    <h1 align="left">Результаты последнего этапа:</h1>
-    <table class="table tablestriped">
-        <thead>
-            <tr>
-                <th>Имя</th>
-                <th>Результат</th>
-                <th>Модель</th>
-                <th>Очки</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr>
-                <td>{{ row["name"] }}</td>
-                <td>{{ row["result"] }}</td>
-                <td>{{ row["model"] }}</td>
-                <td>{{ row["score"] }}</td>
-            </tr>
+    <form action="/" method="get">
+        <h1 align="left">Результаты этапа - {{ etap_name }}:</h1>
+        <h3 align="left">Дата {{ etap_date }} </h3>
+        <div align="left" class="mb-3">        
+            <select name="select_etap" id="select_etap" onchange="this.form.submit()">
+                {% if etap_id == 0 %}
+                    <option value="" selected disabled hidden>Выбери Этап</option>
+                {% else %}
+                    <option value="" disabled hidden>Этап</option>
+                {% endif %}        
+                {% for event in events %}          
+                    {% if event["id"] == etap_id %}   
+                        <option selected value="{{ event["id"] }}">{{ event["event_name"] }}</option>
+                    {% else %}
+                        <option value="{{ event["id"] }}">{{ event["event_name"] }}</option>
+                    {% endif %}            
             {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td></td>
-                <td></td>
-                <td  class="fw-bold">Ссылка на видео</td>
-                <td><a href="{{ link_to_video }}">Жми сюда</a></td>
-            </tr>
-        </tfoot>
-    </table>
+            </select>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Участник</th>
+                    <th>Модель</th>
+                    <th>Результат</th>
+                    <th>Место</th>
+                    <th>Очки</th>                
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result["user_name"] }}</td>
+                    <td>{{ result["model_name"] }} - {{ result["model_model"] }}</td>
+                    <td>{{ result["result"] }}</td>
+                    <td>{{ result["place"] }}</td>
+                    <td>{{ result["score"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><a href={{ etap_link }}>Как покатали </a></td>           
+                </tr>            
+            </tfoot>
+        </table>
+    </form>
 {% endblock %}

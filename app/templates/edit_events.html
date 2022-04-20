@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Этап изменить
+{% endblock %}    
+{% block main %}    
+    {% if session_id == 7  %} 
+    <!--Edit penaltys-->
+        <form action="/admin" method="post">
+            <div align="left" class="mb-3">
+                <button class="btn btn-primary" name="edit_penalty" value="edit_penalty"\
+                type="submit">Редактировать Штрафы</button>            
+    <!--add result-->
+            <hr>            
+            <button class="btn btn-primary"  name="add_result_event" value="add_result_event" 
+                id="add_result_event" type="submit">Добавить результаты</button>
+            </div>
+            <hr> 
+    <!--Edit championats-->
+            <div align="left" class="mb-3">
+                <button class="btn btn-primary" name="create_championat" value="create_championat"\
+                    type="submit">Создать чемпионат</button>
+                <input style="width: 80px;" autocomplete="off" autofocus  id=year_create_championat"
+                    name="year_create_championat" placeholder="Год" min="2022" type="number">
+            </div>
+            <div align="left" class="mb-3">
+                <button class="btn btn-primary" name="delete_championat" value="delete_championat"\
+                    type="submit">Удалить чемпионат</button>
+                <select name="select_delete_championat">
+                    <option value="" selected disabled hidden>Год</option>                    
+                    {% for championat in championats %}
+                        <option value="{{ championat["year"] }}">{{ championat["year"] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <hr />
+            <!--Edit events-->
+            <div align="left" class="mb-3">
+                <input style="margin-bottom: 10px;" autocomplete="off" autofocus class="mx-auto w-auto" id="name_create_event"
+                    name="name_create_event" placeholder="Название этапа" type="text">
+                    <br>
+                <select name="select_championat_create_event">
+                    <option value="" selected disabled hidden>Чемпионат</option>                    
+                    {% for championat in championats %}
+                        <option value="{{ championat["year"] }}">{{ championat["year"] }}</option>
+                    {% endfor %}
+                </select>                
+                <!--Date-->
+                <input autocomplete="off" autofocus class="mx-auto w-auto" id="date_create_event"
+                    name="date_create_event" placeholder="Дата этапа" type="datetime-local">
+                
+            </br>
+                <select style="margin-top:10px" name="select_status_create_event">
+                    <option value="" selected disabled hidden>статус</option>                    
+                    {% for status in statuses %}
+                        <option value="{{ status["value"] }}">{{ status["name"] }}</option>
+                    {% endfor %}
+                </select> 
+
+                <input autocomplete="off" autofocus class="mx-auto w-auto" id="link_create_event"
+                    name="link_create_event" placeholder="link on video" type="text">           
+
+                <!--Create event-->
+                <div class="mb-3">
+                    <button style="margin-top: 10px;" class="btn btn-primary" name="create_event" value="create_event"
+                        type="submit">Создать Этап</button>
+                </div>
+            </div>
+            <div align="left">
+                <!--edit event-->  
+                <div class="mb-3">             
+                    <button class="btn btn-primary"  name="edit_event" value="edit_event" id="edit_event" type="submit">Изменить этап</button>
+                    <select name="select_edit_event">
+                        <option value="" selected disabled hidden>Какой?</option>                    
+                        {% for event in events %}
+                            <option value="{{ event["id"] }}">{{ event["event_name"] }}</option>
+                        {% endfor %}
+                    </select>
+                </div> 
+                
+                
+                <!--delete event-->
+                <div class="mb-3"> 
+                    <button class="btn btn-primary"  name="delete_event" value="delete_event" id="delete_event" type="submit">Удалить этап</button>
+                    <select name="select_delete_event">
+                        <option value="" selected disabled hidden>Какой?</option>                    
+                        {% for event in events %}
+                            <option value="{{event["id"] }}">{{ event["event_name"] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-primary"  name="edit_status_event" value="edit_status_event" 
+                    id="edit_status_event" type="submit">Изменить статус</button>
+                <select name="select_status_event">     
+                    <option value="" selected disabled hidden>На Какой?</option>                    
+                    {% for status in statuses %}
+                        <option value="{{status["id"] }}">{{ status["name"] }}</option>
+                    {% endfor %}        
+                </select> 
+            </div> 
+        </form>
+    {% else %}
+    <!-- Zaglushka!!!-->
+        <h1 align="center">Разрабатывается!</h1>
+    {% endif %}
+{% endblock %}
+{% block script %}    
+{% endblock %}
+

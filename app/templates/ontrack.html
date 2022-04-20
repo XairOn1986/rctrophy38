@@ -41,7 +41,8 @@
             </tbody>
         </table>
         <button class="btn btn-primary" onclick="get_result()" id="get_result" type="submit">Результаты</button>
-        <span id="get_result_span_sum">0</span>  
+        <span id="get_result_span_sum">0</span> <br><br>
+        <button class="btn btn-primary" onclick="clear_result()" id="clear_result" type="submit">Очистить</button> 
 {% endblock %}
 {% block script %}
     <script>
@@ -60,7 +61,7 @@
         
         
         
-        function start_timer(flag) {
+        function start_timer() {
             document.getElementById("start_timer").disabled = true;
             document.getElementById("pause_timer").disabled = false;
             document.getElementById("reset_timer").disabled = true;            
@@ -119,13 +120,29 @@
                 let tds = trs[i].children;
                 sum = sum + (Number(tds[2].textContent) * Number(tds[3].textContent));
             }
-            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}:${secund}`;
+            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute},${secund}`;
         }
         function add_winch_before_limit() {             
             winch_before_limit = winch_before_limit + 1
             if (winch_before_limit == 2) document.getElementById("btn_add_winch_before_limit").disabled = true;            
             document.getElementById("winch_before_limit").innerHTML = winch_before_limit;
-        }            
+        }
+
+        function clear_result() {
+            let trs = document.querySelectorAll("#mainTab tr");
+            let total = new Array(trs[0].children.length).fill(0);
+            // Создает массив размером с количество <th>, заполняет всё нулями
+            for (let i = 1; i < trs.length; i++) {
+                let tds = trs[i].children;                
+                tds[3].innerHTML = 0;
+            }
+            document.getElementById("get_result_span_sum").innerHTML = 0;
+            pause_timer();
+            reset_timer();
+            winch_before_limit = 0;
+            document.getElementById("winch_before_limit").innerHTML = winch_before_limit;
+            document.getElementById("btn_add_winch_before_limit").disabled = false;
+        }
 
     </script>
 {% endblock %}

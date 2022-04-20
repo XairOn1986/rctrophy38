@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Результаты
+{% endblock %}    
+{% block main %}    
+    {% if session_id == 7  %} 
+        <form action="/add_results" method="get">
+            <input style="display: none;" autocomplete="off" autofocus id="username" name="champ_id" type="text"
+            value={{ champ_id }}>
+            
+            <div align="left" class="mb-3">        
+                <select name="select_etap" id="select_etap" onchange="this.form.submit()">
+                    {% if etap_id == 0 %}
+                        <option value="" selected disabled hidden>Этап</option>
+                    {% else %}
+                        <option value="" disabled hidden>Этап</option>
+                    {% endif %} 
+
+                    {% for event in events %}                    
+                        {% if event["championat_id"] == champ_id  %}
+                            {% if event["id"] == etap_id %}   
+                                <option selected value="{{ event["id"] }}">{{ event["event_name"] }}</option>
+                            {% else %}
+                                <option value="{{ event["id"] }}">{{ event["event_name"] }}</option>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </select>                                 
+            </div>
+        
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Участник</th>
+                        <th>Модель</th>
+                        <th>Результат</th>
+                        <th>Место</th>
+                        <th>Очки</th>
+                        <th>Удалить</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result["user_name"] }}</td>
+                        <td>{{ result["model_name"] }} - {{ result["model_model"] }}</td>
+                        <td>{{ result["result"] }}</td>
+                        <td>{{ result["place"] }}</td>
+                        <td>{{ result["score"] }}</td>
+                        <td>
+                            <button name="delete_result" value="{{ result["id"] }}"
+                            type="submit">-</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <div align="left" class="mb-3">
+                <select name="select_user" onchange="this.form.submit()">
+                    {% if user_id == 0 %}
+                        <option value="" selected disabled hidden >Участник</option>
+                    {% else %}
+                        <option value=""  disabled hidden >Участник</option>
+                    {% endif %}
+                                                
+                        {% for user in users %}
+                            {% if user_id == user["id"] %}
+                                <option value="{{ user["id"] }}" selected>{{ user["username"] }}</option>
+                            {% else %}
+                                <option value="{{ user["id"] }}">{{ user["username"] }}</option>
+                            {% endif %}
+                        {% endfor %}
+                </select>
+            </div> 
+            <div align="left" class="mb-3">
+                <select name="select_model">
+                    <option value="" selected disabled hidden >Модель участника</option>
+                    {% for model in models %}
+                        <option value="{{ model["id"] }}">{{ model["name"] }} - {{ model["model"] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div align="left" class="mb-3">
+                <input style="width: 80px;" autocomplete="off" autofocus  id="result_min_sec"
+                    name="result_min_sec" placeholder="mm,ss" min="0" step="0.01" type="number">
+            </div>
+            <div align="left" class="mb-3">
+                <button class="btn btn-primary"  name="add_result" value="add_result" 
+                id="add_result" type="submit">Добавить результат</button> 
+            </div>                      
+        </form>
+    {% else %}
+    <!-- Zaglushka!!!-->
+        <h1 align="center">Разрабатывается!</h1>
+    {% endif %}
+{% endblock %}
+{% block script %} 
+<!--onchange="get_etap_id()"-->
+    <script>
+              
+        function get_etap_id() {
+            let temp = document.getElementById("select_etap");
+            let etap_id = temp.value;
+            let url_ready = document.URL + '&etap_id=' + etap_id            
+            window.location.href = url_ready;            
+        }
+
+    </script>   
+{% endblock %}
+

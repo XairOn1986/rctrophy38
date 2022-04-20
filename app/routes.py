@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*- 
 from app.helpers import apology, login_required, avatar
-from flask import render_template, flash, redirect, request, session
+from flask import render_template, flash, redirect, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from app import app
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+import operator
 
 
 #Add work with MySQL
@@ -19,8 +20,40 @@ sess.init_app(app)
 
 @app.route('/')
 @app.route('/index')
-def index(): 
-    return render_template("index.html")
+def index():
+    db = mysql.connection.cursor()
+    db.execute("select id from championats where deleted=0 order by id limit 1")
+    temp = db.fetchall()
+    championat_id = temp[0]["id"]
+
+    db.execute("select * from events where deleted=0 and status=1 and championat_id=%s", (championat_id,))
+    events = db.fetchall()
+
+    if request.args.get("select_etap") != None:
+        db.execute("select * from events where deleted=0 and status=1 and id=%s", (request.args.get("select_etap"),))
+    else:
+        db.execute("select * from events where deleted=0 and status=1 order by date desc limit 1")
+    temp = db.fetchall()
+
+
+
+    etap_id = temp[0]["id"]
+    etap_name = temp[0]["event_name"]
+    etap_date = temp[0]["date"]
+    etap_link = temp[0]["link"]
+    db.execute("select * from results where event_id = %s and deleted = 0 order by place",(etap_id,))
+    results = db.fetchall()
+    for result in results:
+        db.execute("select username from users where id = %s",(result["user_id"],))
+        temp = db.fetchall()
+        result["user_name"] = temp[0]["username"]
+        db.execute("select * from models where id = %s",(result["model_id"],))
+        temp = db.fetchall()
+        result["model_name"] = temp[0]["name"]
+        result["model_model"] = temp[0]["model"] 
+    
+    return render_template("index.html", results=results, etap_name=etap_name, 
+        etap_date=etap_date, etap_link=etap_link, etap_id=etap_id, events=events)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -304,13 +337,6 @@ def ontrack():
     db.close()   
     return render_template("ontrack.html", session_id=session["user_id"], penaltys=penaltys)
 
-@app.route("/championat", methods=["POST","GET"])
-@login_required
-def championat():
-    if request.method == "POST":
-        if request.form.get("edit_penalty") == "edit_penalty":
-            return redirect("edit_penalty")
-    return render_template("championat.html", session_id=session["user_id"])
 
 @app.route("/edit_penalty", methods=["POST","GET"])
 @login_required
@@ -320,8 +346,7 @@ def edit_penalty():
         #################ADD PENALTY########################                               
         if request.form.get("add_penalty") == "add_penalty":                
             unic_name = db.execute("SELECT * FROM penalty WHERE name = %s", (request.form.get("penalty_name"),))            
-            if unic_name != 0:
-                flash(unic_name) 
+            if unic_name != 0:                 
                 return apology("Name busy", 403)
             name = request.form.get("penalty_name")
             price = request.form.get("penalty_price")
@@ -345,3 +370,277 @@ def edit_penalty():
     penaltys = db.fetchall() 
     db.close()   
     return render_template("edit_penalty.html", penaltys=penaltys, session_id=session["user_id"])
+
+@app.route("/admin", methods=["POST","GET"])
+@login_required
+def admin():
+    db = mysql.connection.cursor()
+    if request.method == "POST":
+    ##############Add and Championat########################################    
+        if request.form.get("create_championat") == "create_championat":
+            if len(request.form.get("year_create_championat")) == 0:
+                flash ("Введи год!")
+                return redirect("/admin")
+            year_champ = int(request.form.get("year_create_championat"))            
+            unic_name_champ = db.execute("SELECT * FROM championats WHERE year = %s and deleted = 0", (year_champ,))            
+            if unic_name_champ != 0:
+                flash("Такой год уже есть!")            
+                return redirect("/admin")
+            else:
+                db.execute("INSERT INTO championats(year, deleted) VALUES(%s,%s)",\
+                (year_champ, 0,))
+                mysql.connection.commit()       
+                flash("Чемпионат добавлен!")
+                return redirect("/admin")
+    ############Delete championat##########################
+        if request.form.get("delete_championat") == "delete_championat":
+            if request.form.get("select_delete_championat") == None:
+                flash ("Выбери год!")
+                return redirect("/admin")
+            year_champ = int(request.form.get("select_delete_championat"))
+            db.execute("UPDATE championats SET deleted = %s WHERE year = %s",\
+            (1, year_champ,))
+            mysql.connection.commit()       
+            flash("Чемпионат удален!")
+            return redirect("/admin")
+    
+    ##################CREATE EVENT#############################################
+        if request.form.get("create_event") == "create_event":
+            if request.form.get("select_championat_create_event") == None:
+                flash ("Выбери чемпионат!")
+                return redirect("/admin")
+            db.execute ("select id from championats where year = %s and deleted = 0",\
+                (request.form.get("select_championat_create_event"),))                
+            query_id = db.fetchall()
+            championat_id = int(query_id[0]["id"])            
+            
+            if len(request.form.get("name_create_event")) == 0:
+                flash ("Введи имя этапа!")
+                return redirect("/admin")
+            event_name = request.form.get("name_create_event")
+
+            if len(request.form.get("date_create_event")) == 0:
+                flash ("Введи дату этапа!")
+                return redirect("/admin")            
+            date = request.form.get("date_create_event")
+
+            if request.form.get("select_status_create_event") == None:
+                flash ("Выбери статус!")
+                return redirect("/admin")
+            status = request.form.get("select_status_create_event")
+            
+            if len(request.form.get("link_create_event")) == 0:
+                link = "Пока нету("                
+            else:
+                link = request.form.get("link_create_event")
+
+            db.execute("INSERT INTO events(championat_id, event_name, date, status, link, deleted)\
+            VALUES (%s,%s,%s,%s,%s,%s)",(championat_id, event_name, date, status, link, 0,))
+            mysql.connection.commit()       
+            flash("Этап добавлен!")
+
+    ##################DELETE EVENT#############################################
+        if request.form.get("delete_event") == "delete_event":
+            if request.form.get("select_delete_event") == None:
+                flash ("Выбери Этап!")
+                return redirect("/admin")
+            event_id = int(request.form.get("select_delete_event"))
+            db.execute("UPDATE events SET deleted = %s WHERE id = %s",\
+            (1, event_id,))
+            mysql.connection.commit()
+
+    ###################EDIT PENALTY###########################################
+        if request.form.get("edit_penalty") == "edit_penalty":
+            return redirect("/edit_penalty")
+    
+    ###################ADD RESULTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if request.form.get("add_result_event") == "add_result_event":
+            if request.form.get("select_result_event") == None:
+                flash ("Выбери Год!")
+            else:
+                query_id = int(request.form.get("select_result_event"))
+                db.execute("select id from championats where year = %s", (query_id,))
+                query_id = db.fetchall()
+                champ_id = query_id[0]["id"]                              
+                return redirect(url_for('add_results', champ_id=champ_id))
+    ###################generate page###########################
+    db.execute("SELECT * FROM events WHERE deleted = 0")
+    events = db.fetchall()
+    db.execute("SELECT * FROM statuses")
+    statuses = db.fetchall()
+    db.execute("SELECT * FROM championats WHERE deleted = 0")
+    championats = db.fetchall()
+    db.close()
+    return render_template("admin.html", session_id=session["user_id"],\
+    championats=championats, statuses=statuses, events=events)
+
+
+
+@app.route("/add_results", methods=["POST","GET"])
+@login_required
+def add_results():    
+    db = mysql.connection.cursor()
+    if request.method == "POST":
+        flash("кнопочку нажали")
+    if request.args.get("champ_id"):
+        champ_id = int(request.args.get("champ_id"))
+    else:
+        champ_id = 0
+    
+    if request.args.get("select_etap"):
+        etap_id = int(request.args.get("select_etap"))
+    else:
+        etap_id = 0
+
+    if request.args.get("select_user"):
+        user_id = int(request.args.get("select_user"))
+    else:
+        user_id = 0  
+   
+    if request.args.get("select_model"):
+        model_id = int(request.args.get("select_model"))
+    else:
+        model_id = 0
+    
+    if request.args.get("result_min_sec"):
+        result_time = float(request.args.get("result_min_sec"))
+    else:
+        result_time = 0
+    
+    
+    ######################Get result from page and add to base
+    if request.args.get("add_result") == "add_result":
+        #test before record
+        if champ_id == 0: 
+            flash ("Выбери чемпионат")
+            return redirect("/admin")
+
+        if (etap_id == 0) or (user_id == 0) or (model_id == 0) or (result_time == 0):
+            flash ("Заполни все поля!")           
+        else:
+            #################add result to base
+            db.execute("INSERT INTO results(event_id, user_id, model_id, result, place, score, deleted)\
+            VALUES (%s,%s,%s,%s,%s,%s,%s)",(etap_id, user_id, model_id, result_time, 0, 0, 0,))
+            mysql.connection.commit()       
+            flash("Результат добавлен!")
+
+            ###################Range by result_time
+            db.execute("select * from results where event_id = %s and deleted = 0",(etap_id,))
+            results = db.fetchall()
+            db.execute("select * from scores")
+            scores = db.fetchall()
+            for result_i in results:
+                result_i["place"] = 1
+                for result_j in results:
+                    if result_j["result"] < result_i["result"]:
+                        result_i["place"] = result_i["place"] + 1
+            
+            
+            for result in results:
+                champ_score = 1
+                for score in scores:
+                    if result["place"] == score["place"]:
+                        champ_score = score["score"]
+                        continue
+                    
+                db.execute("UPDATE results SET place=%s, score=%s WHERE id = %s",\
+                (result["place"], champ_score, result["id"],))
+                mysql.connection.commit()
+    
+    ######################Delete result by button####################################
+    if request.args.get("delete_result"):
+        result_id_for_delete = int(request.args.get("delete_result"))        
+        db.execute("UPDATE results SET deleted=1 WHERE id=%s", (result_id_for_delete,))
+        mysql.connection.commit()
+
+        db.execute("select * from results where event_id = %s and deleted = 0",(etap_id,))
+        results = db.fetchall()
+        db.execute("select * from scores")
+        scores = db.fetchall()
+        for result_i in results:
+            result_i["place"] = 1
+            for result_j in results:
+                if result_j["result"] < result_i["result"]:
+                    result_i["place"] = result_i["place"] + 1
+            
+            
+        for result in results:
+            champ_score = 1
+            for score in scores:
+                if result["place"] == score["place"]:
+                    champ_score = score["score"]
+                    continue
+                    
+            db.execute("UPDATE results SET place=%s, score=%s WHERE id = %s",\
+            (result["place"], champ_score, result["id"],))
+            mysql.connection.commit()
+
+    ######################PAGE LOADING
+    db.execute("select * from results where event_id = %s and deleted = 0 order by place",(etap_id,))
+    results = db.fetchall()
+    for result in results:
+        db.execute("select username from users where id = %s",(result["user_id"],))
+        temp = db.fetchall()
+        result["user_name"] = temp[0]["username"]
+        db.execute("select * from models where id = %s",(result["model_id"],))
+        temp = db.fetchall()
+        result["model_name"] = temp[0]["name"]
+        result["model_model"] = temp[0]["model"]
+
+    db.execute("select * from models where owner = %s", (user_id,))
+    models = db.fetchall()
+    db.execute("SELECT * FROM users")
+    users = db.fetchall()
+    db.execute("SELECT * FROM events WHERE deleted = 0")
+    events = db.fetchall()
+    db.execute("SELECT * FROM statuses")
+    statuses = db.fetchall()
+    db.execute("SELECT * FROM championats WHERE deleted = 0")
+    championats = db.fetchall()
+    db.close()
+    return render_template("/add_results.html", session_id=session["user_id"],\
+    championats=championats, statuses=statuses, events=events, champ_id=champ_id,
+    etap_id=etap_id, users=users, user_id=user_id, models=models, results=results)
+
+
+@app.route("/championat", methods=["POST","GET"])
+@login_required
+def championat():
+    db = mysql.connection.cursor()
+    db.execute("select * from championats where deleted=0 order by id limit 1")
+    temp = db.fetchall()
+    championat_year = temp[0]["year"]
+    championt_id = temp[0]["id"]
+
+    db.execute("select * from users")
+    users = db.fetchall()
+
+    db.execute("select id from events where championat_id=%s and deleted=0", (championt_id,))
+    temps = db.fetchall()
+
+    events_id = []
+
+    for temp in temps:
+        events_id.append(temp["id"])
+
+    for user in users:
+        user["avatar"] = avatar(user["email"],128)
+
+        db.execute("select * from results where user_id=%s and deleted=0",(user["id"],))
+        results = db.fetchall()
+        sum_score = 0
+
+        for result in results:
+            if result["event_id"] in events_id:
+                sum_score = sum_score + result["score"]
+        
+        user["score"] = sum_score
+
+    rows = sorted(users, key=lambda d: d['score'], reverse=True)
+
+    i = 1
+    for row in rows:        
+        row["place"] = i
+        i = i + 1
+
+    return render_template("championat.html", championat_year=championat_year, rows=rows)
