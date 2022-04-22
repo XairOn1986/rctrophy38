@@ -344,9 +344,7 @@ def ontrack():
                     #################add result to base
                     db.execute("INSERT INTO results(event_id, user_id, model_id, result, place, score, deleted)\
                     VALUES (%s,%s,%s,%s,%s,%s,%s)",(etap_id, user_id, model_id, result_time, 0, 0, 0,))
-                    mysql.connection.commit()       
-                    flash("Результат добавлен!")
-
+                    mysql.connection.commit()
                     ###################Range by result_time
                     db.execute("select * from results where event_id = %s and deleted = 0",(etap_id,))
                     results = db.fetchall()
@@ -780,7 +778,7 @@ def edit_etap():
 @app.route("/join_etap", methods=["POST","GET"])
 def join_etap():
     db = mysql.connection.cursor()
-    db.execute("select * from events where status=0 limit 1")
+    db.execute("select * from events where status=0 and deleted=0 limit 1")
     temp = db.fetchall()
     if len(temp) != 0:
         etap = temp[0]

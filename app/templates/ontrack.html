@@ -108,7 +108,7 @@
         function timer_go() {
             secund = secund + 1;
             if (secund == 60) {
-                secund =0;
+                secund = 0;
                 minute = minute + 1;
                 document.getElementById("minute").innerHTML = minute;
             }
@@ -139,6 +139,7 @@
                 let tds = trs[i].children;
                 sum = sum + (Number(tds[2].textContent) * Number(tds[3].textContent));
             }
+            if (secund < 10) secund = "0" + secund;
             document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}.${secund}`;
             document.getElementById("result_span_sum").value = `${sum + minute}.${secund}`;            
         }
