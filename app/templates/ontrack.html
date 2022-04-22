@@ -39,10 +39,29 @@
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
-        <button class="btn btn-primary" onclick="get_result()" id="get_result" type="submit">Результаты</button>
-        <span id="get_result_span_sum">0</span> <br><br>
-        <button class="btn btn-primary" onclick="clear_result()" id="clear_result" type="submit">Очистить</button> 
+        </table>        
+        <button class="btn btn-primary" onclick="get_result()" id="get_result">Результаты</button>
+        <b><span> - </span><span id="get_result_span_sum">0</span></b><br><br>
+        <div align="left">
+            <button class="btn btn-primary" onclick="clear_result()" id="clear_result" >Очистить</button> 
+        </div>
+        <form action="/ontrack" method="POST">          
+            {% if session["user_id"] %}
+                <input style="display:none" name="result_span_sum" id="result_span_sum"></input>
+                <input style="display:none" value="{{ event["id"] }}" name="etap_id_span" id="etap_id_span"></input>
+                <span>Этап: {{ event["event_name"] }}</span>
+                <div class="mb-3" style="margin-top: 10px;">
+                    <button class="btn btn-primary" id="save_result" type="submit"
+                        name="save_result" value="save_result">Сохранить</button>                
+                    <select style="margin-top:10px" name="select_save_user">
+                        <option value="" selected disabled hidden>участник</option>                    
+                        {% for participant in participants %}
+                            <option value="{{ participant["id"] }}">{{ participant["user_name"] }} - {{ participant["model_name"] }}</option>                        
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+        </form>
 {% endblock %}
 {% block script %}
     <script>
@@ -120,7 +139,8 @@
                 let tds = trs[i].children;
                 sum = sum + (Number(tds[2].textContent) * Number(tds[3].textContent));
             }
-            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute},${secund}`;
+            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}.${secund}`;
+            document.getElementById("result_span_sum").value = `${sum + minute}.${secund}`;            
         }
         function add_winch_before_limit() {             
             winch_before_limit = winch_before_limit + 1

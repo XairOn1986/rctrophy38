@@ -26,13 +26,13 @@ def index():
     temp = db.fetchall()
     championat_id = temp[0]["id"]
 
-    db.execute("select * from events where deleted=0 and status=1 and championat_id=%s", (championat_id,))
+    db.execute("select * from events where deleted=0 and championat_id=%s", (championat_id,))
     events = db.fetchall()
 
     if request.args.get("select_etap") != None:
-        db.execute("select * from events where deleted=0 and status=1 and id=%s", (request.args.get("select_etap"),))
+        db.execute("select * from events where deleted=0 and id=%s", (request.args.get("select_etap"),))
     else:
-        db.execute("select * from events where deleted=0 and status=1 order by date desc limit 1")
+        db.execute("select * from events where deleted=0 order by date desc limit 1")
     temp = db.fetchall()
 
 
@@ -313,7 +313,6 @@ def edit_model():
     return redirect("/garage")
 
 @app.route("/all_models")
-@login_required
 def all_models():    
     #Show models
     db = mysql.connection.cursor()    
@@ -328,14 +327,84 @@ def all_models():
     db.close()
     return render_template("all_models.html", models=models)
 
-@app.route("/ontrack")
-@login_required
+@app.route("/ontrack", methods=["POST","GET"])
 def ontrack():
     db = mysql.connection.cursor()
+    ####################SAVE results
+    if request.form.get("save_result") == "save_result":
+        if request.form.get("etap_id_span"):
+            if request.form.get("result_span_sum"):
+                if request.form.get("select_save_user"):
+                    db.execute("select * from joiners where id=%s", (int(request.form.get("select_save_user")),))
+                    temp = db.fetchall()
+                    user_id = int(temp[0]["user_id"])
+                    model_id = int(temp[0]["model_id"])
+                    result_time = float(request.form.get("result_span_sum"))
+                    etap_id = int(request.form.get("etap_id_span"))
+                    #################add result to base
+                    db.execute("INSERT INTO results(event_id, user_id, model_id, result, place, score, deleted)\
+                    VALUES (%s,%s,%s,%s,%s,%s,%s)",(etap_id, user_id, model_id, result_time, 0, 0, 0,))
+                    mysql.connection.commit()       
+                    flash("Результат добавлен!")
+
+                    ###################Range by result_time
+                    db.execute("select * from results where event_id = %s and deleted = 0",(etap_id,))
+                    results = db.fetchall()
+                    db.execute("select * from scores")
+                    scores = db.fetchall()
+                    for result_i in results:
+                        result_i["place"] = 1
+                        for result_j in results:
+                            if result_j["result"] < result_i["result"]:
+                                result_i["place"] = result_i["place"] + 1
+                    
+                    
+                    for result in results:
+                        champ_score = 1
+                        for score in scores:
+                            if result["place"] == score["place"]:
+                                champ_score = score["score"]
+                                continue
+                            
+                        db.execute("UPDATE results SET place=%s, score=%s WHERE id = %s",\
+                        (result["place"], champ_score, result["id"],))
+                        mysql.connection.commit()
+
+                    flash("Результат записан")
+                else:
+                    flash("Выбери участника")
+            else:
+                flash("Нет результатов заезда")
+        else:
+            flash("Нет этапа со статусом регистрация")
+        
+        
+
+
+    ####################PAGE PRINT
     db.execute("SELECT * FROM penalty WHERE DELETED = 0")
-    penaltys = db.fetchall() 
+    penaltys = db.fetchall()
+
+    db.execute("select * from events where status=0 and deleted=0 order by date limit 1")
+    temp = db.fetchall()
+
+    if len(temp) == 0:
+        event = []
+        participants = []
+    else:
+        event = temp[0]
+        db.execute("select * from joiners where etap_id=%s and deleted=0", (event["id"],))
+        participants = db.fetchall()  
+        if len(participants) != 0:
+            for participant in participants:
+                db.execute("select * from users where id=%s", (participant["user_id"],))
+                temp = db.fetchall()
+                participant["user_name"] = temp[0]["username"]
+                db.execute("select * from models where id=%s", (participant["model_id"],))
+                temp = db.fetchall()
+                participant["model_name"] = temp[0]["name"]
     db.close()   
-    return render_template("ontrack.html", session_id=session["user_id"], penaltys=penaltys)
+    return render_template("ontrack.html", penaltys=penaltys, event=event, participants=participants)
 
 
 @app.route("/edit_penalty", methods=["POST","GET"])
@@ -463,6 +532,18 @@ def admin():
                 query_id = db.fetchall()
                 champ_id = query_id[0]["id"]                              
                 return redirect(url_for('add_results', champ_id=champ_id))
+
+
+    ###################EDIT ETAP###############################
+        if request.form.get("edit_event") == "edit_event":
+            if request.form.get("select_edit_event") == None:
+                flash ("Выбери Этап для редактирования!")
+            else:
+                query_id = int(request.form.get("select_edit_event"))
+                db.execute("select id from events where id=%s", (query_id,))
+                query_id = db.fetchall()
+                etap_id = query_id[0]["id"]                              
+                return redirect(url_for('edit_etap', etap_id=etap_id))
     ###################generate page###########################
     db.execute("SELECT * FROM events WHERE deleted = 0")
     events = db.fetchall()
@@ -603,8 +684,7 @@ def add_results():
     etap_id=etap_id, users=users, user_id=user_id, models=models, results=results)
 
 
-@app.route("/championat", methods=["POST","GET"])
-@login_required
+@app.route("/championat")
 def championat():
     db = mysql.connection.cursor()
     db.execute("select * from championats where deleted=0 order by id limit 1")
@@ -644,3 +724,124 @@ def championat():
         i = i + 1
 
     return render_template("championat.html", championat_year=championat_year, rows=rows)
+
+
+@app.route("/edit_etap", methods=["POST","GET"])
+@login_required
+def edit_etap():
+    db = mysql.connection.cursor() 
+
+    if request.args.get("etap_id"):
+        etap_id = int(request.args.get("etap_id"))
+    else:
+        etap_id = 0
+
+    if request.args.get("save_edit_etap") == "save_edit_etap":
+        if len(request.args.get("name_event")) == 0:
+            flash("Название этапа необходимо!")
+            return redirect(url_for('edit_etap', etap_id=etap_id))        
+        if len(request.args.get("date_event")) == 0:
+            flash("Введите дату")
+            return redirect(url_for('edit_etap', etap_id=etap_id))
+        
+        if len(request.args.get("link_event")) == 0:
+            flash("Введите ссылку")
+            return redirect(url_for('edit_etap', etap_id=etap_id))
+
+        if request.args.get("select_status_create_event") == None:
+            flash("Нужно выбрать статус")
+            return redirect(url_for('edit_etap', etap_id=etap_id))
+
+        db.execute("UPDATE events SET event_name=%s, date=%s, link=%s, status=%s  WHERE id=%s",\
+                (request.args.get("name_event"), request.args.get("date_event"),\
+                request.args.get("link_event"),int(request.args.get("select_status_create_event")), etap_id,))
+        mysql.connection.commit()               
+
+        flash("Изменения сохранены")
+        return redirect(url_for('edit_etap', etap_id=etap_id))
+
+    
+    db.execute("select * from events where id=%s", (etap_id,))
+    query_id = db.fetchall()
+    if len(query_id) != 0:
+        etap = query_id[0]
+        etap["date"] = str(etap["date"]).replace(" ","T")
+    else:
+        etap = []
+    
+
+    db.execute("select * from statuses")
+    statuses = db.fetchall()
+
+    db.close()            
+
+    return render_template("edit_etap.html", etap=etap, statuses=statuses)
+
+@app.route("/join_etap", methods=["POST","GET"])
+def join_etap():
+    db = mysql.connection.cursor()
+    db.execute("select * from events where status=0 limit 1")
+    temp = db.fetchall()
+    if len(temp) != 0:
+        etap = temp[0]
+    else:
+        etap = [] 
+
+    ##############ADD participant
+    if request.form.get("add_joiner") == "add_joiner":
+        if request.form.get("select_model") == None:
+            flash("Выбери модель!")
+        else:
+            flag = False
+            db.execute("select * from joiners where etap_id=%s and deleted=0",(etap["id"],))
+            joiners = db.fetchall() 
+            for joiner in joiners:
+                if  int(request.form.get("select_model")) == joiner["model_id"]:
+                    flag = True
+            if flag:
+                flash("Такая модель уже зарегистрирована!")
+            else:
+                db.execute("INSERT INTO joiners(etap_id, user_id, model_id, deleted) VALUES(%s, %s, %s, %s)",\
+                (etap["id"], session["user_id"], request.form.get("select_model"), 0,))
+                mysql.connection.commit()
+                flash("Модель зарегистрирована!")                
+ ##############ADD participant
+    if request.form.get("del_joiner") == "del_joiner":
+        if request.form.get("select_model") == None:
+            flash("Выбери модель!")
+        else:
+            flag = False
+            db.execute("select * from joiners where etap_id=%s and deleted=0",(etap["id"],))
+            joiners = db.fetchall() 
+            for joiner in joiners:
+                if  int(request.form.get("select_model")) == joiner["model_id"]:
+                    flag = True
+                    joiner_id = joiner["id"]
+            if flag:
+                db.execute("UPDATE joiners SET deleted = 1 WHERE id = %s",\
+                (joiner_id,))
+                mysql.connection.commit()
+                flash("Модель снята с соревнований!")
+            else:
+                flash("Модель не была зарегистрирована!")
+
+#########################PRINT PAGE
+    if len(etap) !=0:
+        db.execute("select * from joiners where etap_id=%s and deleted=0",(etap["id"],))
+        joiners = db.fetchall()
+        if len(joiners) != 0:
+            for joiner in joiners:
+                db.execute("select * from users where id=%s", (joiner["user_id"],))
+                temp = db.fetchall()
+                joiner["user_name"] = temp[0]["username"]
+
+                db.execute("select * from models where id=%s", (joiner["model_id"],))
+                temp = db.fetchall()
+                joiner["model_name"] = temp[0]["name"]
+                joiner["model_model"] = temp[0]["model"]
+    else:
+        joiners=[]
+    db.execute("select * from models")
+    models = db.fetchall()
+    db.close()    
+    return render_template("join_etap.html", etap=etap, models=models, joiners=joiners)

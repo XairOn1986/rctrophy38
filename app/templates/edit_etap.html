@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Редактировать Этап
+{% endblock %}
+
+{% block main %}
+    <form action="/edit_etap" method="GET">
+        <input style="display:none" name="etap_id" value="{{ etap["id"] }}"></input>
+        <h1 align="left">Редактировать Этап:</h1>
+        <div class="mb-3">
+            <span><b>Название этапа</b></span>        
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="mx-auto w-auto" id="name_event"
+                value="{{ etap["event_name"] }}" name="name_event" placeholder="Название этапа" type="text">
+        </div>
+        
+        <!--Date-->
+        <div class="mb-3">
+            <span><b>Дата</b></span>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="mx-auto w-auto" id="date_event"
+                name="date_event" value="{{ etap["date"] }}" placeholder="Дата этапа" type="datetime-local">
+        </div>
+        <div class="mb-3">
+            <span><b>Ссылка на видео</b></span>        
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="mx-auto w-auto" id="link_event"
+                value="{{ etap["link"] }}" name="link_event" placeholder="link on video" type="text">
+        </div> 
+        <div class="mb-3">
+            <span><b>Статус этапа</b></span>        
+        </div>
+        <select style="margin-top:10px" name="select_status_create_event">
+            <option value="" selected disabled hidden>статус</option>                    
+            {% for status in statuses %}
+                {% if status["value"] == etap["status"] %}
+                <option selected value="{{ status["value"] }}">{{ status["name"] }}</option>
+                {% else %}
+                    <option value="{{ status["value"] }}">{{ status["name"] }}</option>
+                {% endif %}
+            {% endfor %}
+        </select> 
+        <div class="mb-3" style="margin-top:10px">
+            <button class="btn btn-primary"  name="save_edit_etap" value="save_edit_etap" type="submit">Сохранить</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

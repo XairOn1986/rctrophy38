@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Регистрация на этап
+{% endblock %}
+
+{% block main %}
+    {% if etap %}
+        <form action="/join_etap" method="post">
+            
+                <h1 align="left">Регистрация на этап - {{ etap["event_name"] }}:</h1>
+                <h3 align="left">Дата {{ etap["date"] }} </h3>
+                <div align="left" class="mb-3">
+                    {% if session["user_id"] %}         
+                    <select name="select_model" id="select_model">
+                        <option value="" selected disabled hidden>Выбери модель</option>        
+                        {% for model in models %}
+                            {% if session["user_id"] == model["owner"] %}
+                                <option value="{{ model["id"] }}">{{ model["name"] }} - {{ model["model"] }}</option>                               
+                            {% endif %}
+                        {% endfor %}
+                    
+                    </select>
+                    <button class="btn btn-primary"  name="add_joiner" value="add_joiner" 
+                        type="submit">Зарегистрироваться</button>
+                    <button class="btn btn-primary"  name="del_joiner" value="del_joiner" 
+                        type="submit">Отписаться</button>
+                    {% endif %}
+                </div>
+                
+        </form>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Участник</th>
+                            <th>Модель</th>            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for joiner in joiners %}
+                        <tr>
+                            <td>{{ joiner["user_name"] }}</td>
+                            <td>{{ joiner["model_name"] }} - {{ joiner["model_model"] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>        
+                        </tr>            
+                    </tfoot>
+                </table>            
+        {% else %}
+            <h1 align="left">Готовьте модели!</h1>
+            <h1 align="left">Этап близко=)</h1>
+        {% endif %}
+{% endblock %}
