@@ -139,9 +139,16 @@
                 let tds = trs[i].children;
                 sum = sum + (Number(tds[2].textContent) * Number(tds[3].textContent));
             }
-            if (secund < 10) secund = "0" + secund;
-            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}.${secund}`;
-            document.getElementById("result_span_sum").value = `${sum + minute}.${secund}`;            
+            let temp_secund;
+            if (secund < 10) {
+                temp_secund = "0" + secund;
+            }
+            else {
+                temp_secund = secund;
+            }
+
+            document.getElementById("get_result_span_sum").innerHTML = `${sum + minute}.${temp_secund}`;            
+            document.getElementById("result_span_sum").value = `${sum + minute}.${temp_secund}`;            
         }
         function add_winch_before_limit() {             
             winch_before_limit = winch_before_limit + 1
